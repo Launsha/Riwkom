@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Komik Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --card-bg: #1e1e1e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --primary: #bb86fc;
+            --primary-variant: #3700b3;
+            --secondary: #03dac6;
+            --error: #cf6679;
+            --success: #4caf50;
+            --warning: #ff9800;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: rgba(30, 30, 30, 0.9);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .logo i {
+            font-size: 2rem;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .search-container input {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border-radius: 30px;
+            border: 2px solid var(--primary-variant);
+            background-color: rgba(55, 0, 179, 0.2);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .search-container input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(187, 134, 252, 0.3);
+        }
+
+        .search-container button {
+            background-color: var(--primary);
+            color: var(--bg-dark);
+            border: none;
+            border-radius: 30px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .search-container button:hover {
+            background-color: #9a67ea;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: var(--bg-dark);
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background-color: #9a67ea;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(187, 134, 252, 0.1);
+        }
+
+        .btn-settings {
+            background-color: rgba(55, 0, 179, 0.3);
+            color: var(--primary);
+        }
+
+        .btn-settings:hover {
+            background-color: rgba(55, 0, 179, 0.5);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .section-title {
+            margin: 20px 0;
+            font-size: 1.8rem;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .comic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .comic-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .comic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .comic-cover {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .comic-info {
+            padding: 15px;
+        }
+
+        .comic-title {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .comic-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .comic-type {
+            background-color: var(--primary-variant);
+            color: var(--text-primary);
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+        }
+
+        .comic-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--warning);
+        }
+
+        .comic-date {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        .comic-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .no-comics {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .no-comics i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 20px;
+            background-color: var(--primary-variant);
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: var(--error);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 5px;
+            border: 1px solid rgba(187, 134, 252, 0.3);
+            background-color: rgba(55, 0, 179, 0.1);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(187, 134, 252, 0.3);
+        }
+
+        .cover-preview {
+            width: 150px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+            border: 2px dashed var(--primary);
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .settings-container {
+            padding: 20px;
+        }
+
+        .settings-info {
+            background-color: rgba(55, 0, 179, 0.2);
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .settings-info h3 {
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .settings-info ul {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .settings-info li {
+            margin-bottom: 5px;
+        }
+
+        .settings-info a {
+            color: var(--secondary);
+            text-decoration: none;
+        }
+
+        .settings-info a:hover {
+            text-decoration: underline;
+        }
+
+        .github-info {
+            background-color: rgba(3, 218, 198, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            color: var(--text-secondary);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 5px;
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 2000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast-success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast-error {
+            border-left: 4px solid var(--error);
+        }
+
+        @media (max-width: 768px) {
+            .comic-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .header-actions {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-book"></i>
+            <span>Komik Tracker</span>
+        </div>
+        
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Cari komik berdasarkan judul...">
+            <button id="searchButton"><i class="fas fa-search"></i> Cari</button>
+        </div>
+        
+        <div class="header-actions">
+            <button id="addComicBtn" class="btn">
+                <i class="fas fa-plus"></i> Tambah Komik
+            </button>
+            <button id="settingsBtn" class="btn btn-settings">
+                <i class="fas fa-cog"></i> Pengaturan
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2 class="section-title">
+            <i class="fas fa-bookmark"></i> Koleksi Komik
+        </h2>
+        
+        <div class="comic-grid" id="comicGrid">
+            <!-- Komik akan ditampilkan di sini secara dinamis -->
+        </div>
+    </div>
+    
+    <!-- Modal untuk menambah/mengedit komik -->
+    <div id="comicModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Tambah Komik Baru</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="comicForm">
+                    <input type="hidden" id="comicId">
+                    
+                    <div class="form-group">
+                        <label for="coverInput">Cover Komik</label>
+                        <input type="file" id="coverInput" accept="image/*" class="form-control">
+                        <img id="coverPreview" class="cover-preview" alt="Preview Cover">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="titleInput">Judul Komik</label>
+                        <input type="text" id="titleInput" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="chapterInput">Chapter</label>
+                        <input type="text" id="chapterInput" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="typeInput">Tipe</label>
+                        <select id="typeInput" class="form-control" required>
+                            <option value="">Pilih Tipe</option>
+                            <option value="manga">Manga</option>
+                            <option value="manhwa">Manhwa</option>
+                            <option value="manhua">Manhua</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ratingInput">Rating (0-5)</label>
+                        <input type="number" id="ratingInput" class="form-control" min="0" max="5" step="0.1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dateInput">Tanggal Baca</label>
+                        <input type="date" id="dateInput" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="synopsisInput">Sinopsis</label>
+                        <textarea id="synopsisInput" class="form-control" rows="4"></textarea>
+                    </div>
+                    
+                    <div class="btn-container">
+                        <button type="button" class="btn btn-secondary close-btn">Batal</button>
+                        <button type="submit" class="btn">Simpan Komik</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal untuk pengaturan -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Pengaturan GitHub</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="settings-container">
+                <div class="settings-info">
+                    <h3><i class="fas fa-info-circle"></i> Informasi Penyimpanan Data</h3>
+                    <p>Website ini menggunakan GitHub API untuk menyimpan data riwayat baca komik. Untuk menggunakan fitur ini, Anda perlu:</p>
+                    <ul>
+                        <li>Repository GitHub untuk menyimpan data</li>
+                        <li>Personal Access Token (PAT) dengan izin <code>repo</code></li>
+                    </ul>
+                    <p>Panduan membuat Personal Access Token: 
+                        <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token" target="_blank">
+                            GitHub Documentation
+                        </a>
+                    </p>
+                </div>
+                
+                <form id="settingsForm">
+                    <div class="form-group">
+                        <label for="githubOwner">Pemilik Repositori (Owner)</label>
+                        <input type="text" id="githubOwner" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="githubRepo">Nama Repositori</label>
+                        <input type="text" id="githubRepo" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="githubToken">Personal Access Token</label>
+                        <input type="password" id="githubToken" class="form-control" required>
+                    </div>
+                    
+                    <div class="github-info">
+                        <p><strong>Catatan:</strong> Token akan disimpan di penyimpanan lokal browser Anda dan hanya digunakan untuk berinteraksi dengan GitHub API.</p>
+                    </div>
+                    
+                    <div class="btn-container">
+                        <button type="button" class="btn btn-secondary close-btn">Batal</button>
+                        <button type="submit" class="btn">Simpan Pengaturan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast notification -->
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Operasi berhasil dilakukan</span>
+    </div>
+
+    <footer>
+        <p>Komik Tracker &copy; 2023 | Catat semua riwayat baca komik Anda</p>
+    </footer>
+
+    <script>
+        // Data contoh untuk demonstrasi
+        let comics = [
+            {
+                id: "1",
+                title: "One Piece",
+                chapter: "1054",
+                type: "manga",
+                rating: 4.9,
+                date: "2023-07-15",
+                synopsis: "Petualangan Monkey D. Luffy dan kru Bajak Laut Topi Jerami mencari One Piece.",
+                cover: "https://mangadex.org/covers/32f0d3a7-ef9a-4c96-94e3-ff7061b68432/9f6f6f5c-5f38-4f2a-a5d2-0e4f1b5a0b0d.jpg"
+            },
+            {
+                id: "2",
+                title: "Solo Leveling",
+                chapter: "179",
+                type: "manhwa",
+                rating: 4.8,
+                date: "2023-07-10",
+                synopsis: "Sung Jin-Woo, hunter level E terlemah, mendapatkan kemampuan untuk naik level.",
+                cover: "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/2b1d25d6-0a1a-4f4d-8f0c-8d0c4d0c8d0c.jpg"
+            },
+            {
+                id: "3",
+                title: "Tower of God",
+                chapter: "550",
+                type: "manhwa",
+                rating: 4.7,
+                date: "2023-07-05",
+                synopsis: "Bam memasuki Menara untuk menemukan temannya Rachel dan mengungkap misteri menara.",
+                cover: "https://mangadex.org/covers/5f3b5c5c-5c5c-5c5c-5c5c-5c5c5c5c5c5c/1c1c1c1c-1c1c-1c1c-1c1c-1c1c1c1c1c1c.jpg"
+            },
+            {
+                id: "4",
+                title: "Attack on Titan",
+                chapter: "139",
+                type: "manga",
+                rating: 4.9,
+                date: "2023-06-28",
+                synopsis: "Eren Yeager dan teman-temannya berperang melawan Titan untuk menyelamatkan umat manusia.",
+                cover: "https://mangadex.org/covers/4d4d4d4d-4d4d-4d4d-4d4d-4d4d4d4d4d4d/3d3d3d3d-3d3d-3d3d-3d3d-3d3d3d3d3d3d.jpg"
+            }
+        ];
+        
+        // DOM Elements
+        const comicGrid = document.getElementById('comicGrid');
+        const comicModal = document.getElementById('comicModal');
+        const settingsModal = document.getElementById('settingsModal');
+        const comicForm = document.getElementById('comicForm');
+        const settingsForm = document.getElementById('settingsForm');
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const addComicBtn = document.getElementById('addComicBtn');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        const coverInput = document.getElementById('coverInput');
+        const coverPreview = document.getElementById('coverPreview');
+        
+        // State
+        let editingComicId = null;
+        let currentCover = null;
+        
+        // Initialize the app
+        function init() {
+            renderComics(comics);
+            setupEventListeners();
+            loadSettings();
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Open modals
+            addComicBtn.addEventListener('click', () => openComicModal());
+            settingsBtn.addEventListener('click', () => openSettingsModal());
+            
+            // Close modals
+            document.querySelectorAll('.close-btn').forEach(btn => {
+                btn.addEventListener('click', closeAllModals);
+            });
+            
+            // Form submissions
+            comicForm.addEventListener('submit', saveComic);
+            settingsForm.addEventListener('submit', saveSettings);
+            
+            // Search functionality
+            searchButton.addEventListener('click', searchComics);
+            searchInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') searchComics();
+            });
+            
+            // Cover image preview
+            coverInput.addEventListener('change', handleCoverUpload);
+        }
+        
+        // Render comics to the grid
+        function renderComics(comicsArray) {
+            if (!comicsArray || comicsArray.length === 0) {
+                comicGrid.innerHTML = `
+                    <div class="no-comics">
+                        <i class="fas fa-book-open"></i>
+                        <h3>Tidak ada komik yang ditemukan</h3>
+                        <p>Mulai dengan menambahkan komik baru</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            comicGrid.innerHTML = comicsArray.map(comic => `
+                <div class="comic-card" data-id="${comic.id}">
+                    <img src="${comic.cover}" alt="${comic.title}" class="comic-cover">
+                    <div class="comic-info">
+                        <h3 class="comic-title">${comic.title}</h3>
+                        <div class="comic-details">
+                            <span>Ch. ${comic.chapter}</span>
+                            <span class="comic-type">${getTypeName(comic.type)}</span>
+                        </div>
+                        <div class="comic-rating">
+                            <i class="fas fa-star"></i>
+                            <span>${comic.rating}</span>
+                        </div>
+                        <div class="comic-date">
+                            <i class="far fa-calendar"></i>
+                            ${formatDate(comic.date)}
+                        </div>
+                        <div class="comic-actions">
+                            <button class="btn btn-secondary edit-comic" data-id="${comic.id}">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn delete-comic" data-id="${comic.id}">
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add event listeners to action buttons
+            document.querySelectorAll('.edit-comic').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const comicId = e.target.closest('button').dataset.id;
+                    openComicModal(comicId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-comic').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const comicId = e.target.closest('button').dataset.id;
+                    deleteComic(comicId);
+                });
+            });
+        }
+        
+        // Open comic modal for adding or editing
+        function openComicModal(comicId = null) {
+            const modalTitle = document.getElementById('modalTitle');
+            
+            if (comicId) {
+                // Editing existing comic
+                modalTitle.innerHTML = '<i class="fas fa-edit"></i> Edit Komik';
+                editingComicId = comicId;
+                const comic = comics.find(c => c.id === comicId);
+                if (comic) {
+                    document.getElementById('comicId').value = comic.id;
+                    document.getElementById('titleInput').value = comic.title;
+                    document.getElementById('chapterInput').value = comic.chapter;
+                    document.getElementById('typeInput').value = comic.type;
+                    document.getElementById('ratingInput').value = comic.rating;
+                    document.getElementById('dateInput').value = comic.date;
+                    document.getElementById('synopsisInput').value = comic.synopsis;
+                    
+                    // Handle cover
+                    coverPreview.src = comic.cover;
+                    coverPreview.style.display = 'block';
+                    currentCover = comic.cover;
+                }
+            } else {
+                // Adding new comic
+                modalTitle.innerHTML = '<i class="fas fa-plus"></i> Tambah Komik Baru';
+                editingComicId = null;
+                comicForm.reset();
+                coverPreview.style.display = 'none';
+                currentCover = null;
+            }
+            
+            comicModal.style.display = 'flex';
+        }
+        
+        // Open settings modal
+        function openSettingsModal() {
+            settingsModal.style.display = 'flex';
+        }
+        
+        // Close all modals
+        function closeAllModals() {
+            comicModal.style.display = 'none';
+            settingsModal.style.display = 'none';
+        }
+        
+        // Handle cover image upload
+        function handleCoverUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    coverPreview.src = event.target.result;
+                    coverPreview.style.display = 'block';
+                    currentCover = event.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // Save comic (new or edited)
+        function saveComic(e) {
+            e.preventDefault();
+            
+            const comicData = {
+                id: editingComicId || Date.now().toString(),
+                title: document.getElementById('titleInput').value,
+                chapter: document.getElementById('chapterInput').value,
+                type: document.getElementById('typeInput').value,
+                rating: parseFloat(document.getElementById('ratingInput').value),
+                date: document.getElementById('dateInput').value,
+                synopsis: document.getElementById('synopsisInput').value,
+                cover: currentCover || 'https://via.placeholder.com/150x200?text=No+Cover'
+            };
+            
+            if (editingComicId) {
+                // Update existing comic
+                const index = comics.findIndex(c => c.id === editingComicId);
+                if (index !== -1) {
+                    comics[index] = comicData;
+                }
+            } else {
+                // Add new comic
+                comics.push(comicData);
+            }
+            
+            // Save to GitHub (simulated)
+            saveToGitHub(comicData, editingComicId !== null);
+            
+            renderComics(comics);
+            closeAllModals();
+            showToast(editingComicId ? 'Komik berhasil diperbarui!' : 'Komik baru berhasil ditambahkan!');
+        }
+        
+        // Delete comic
+        function deleteComic(comicId) {
+            if (confirm('Apakah Anda yakin ingin menghapus komik ini?')) {
+                comics = comics.filter(comic => comic.id !== comicId);
+                renderComics(comics);
+                showToast('Komik berhasil dihapus!');
+                // In a real app, we would also delete from GitHub
+            }
+        }
+        
+        // Search comics by title
+        function searchComics() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            if (searchTerm === '') {
+                renderComics(comics);
+                return;
+            }
+            
+            const filteredComics = comics.filter(comic => 
+                comic.title.toLowerCase().includes(searchTerm)
+            );
+            
+            renderComics(filteredComics);
+        }
+        
+        // Save settings
+        function saveSettings(e) {
+            e.preventDefault();
+            
+            const settings = {
+                owner: document.getElementById('githubOwner').value,
+                repo: document.getElementById('githubRepo').value,
+                token: document.getElementById('githubToken').value
+            };
+            
+            localStorage.setItem('comicTrackerSettings', JSON.stringify(settings));
+            closeAllModals();
+            showToast('Pengaturan GitHub berhasil disimpan!');
+        }
+        
+        // Load settings
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('comicTrackerSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                document.getElementById('githubOwner').value = settings.owner || '';
+                document.getElementById('githubRepo').value = settings.repo || '';
+                document.getElementById('githubToken').value = settings.token || '';
+            }
+        }
+        
+        // Simulate saving to GitHub
+        function saveToGitHub(comicData, isUpdate) {
+            // In a real implementation, this would use GitHub API
+            console.log(`Simpan ke GitHub: ${isUpdate ? 'Update' : 'Tambah'} komik "${comicData.title}"`);
+            // This is where we would use:
+            // fetch('https://api.github.com/repos/{owner}/{repo}/contents/bookmarks.json', {
+            //   method: 'PUT',
+            //   headers: {
+            //     'Authorization': `token ${settings.token}`,
+            //     'Content-Type': 'application/json'
+            //   },
+            //   body: JSON.stringify({
+            //     message: isUpdate ? 'Update komik' : 'Tambah komik baru',
+            //     content: btoa(JSON.stringify(comics)),
+            //     sha: currentSha // SHA of the current file
+            //   })
+            // })
+        }
+        
+        // Show toast notification
+        function showToast(message, isError = false) {
+            toastMessage.textContent = message;
+            toast.className = isError ? 'toast toast-error' : 'toast toast-success';
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Helper: Get type name
+        function getTypeName(type) {
+            switch(type) {
+                case 'manga': return 'Manga';
+                case 'manhwa': return 'Manhwa';
+                case 'manhua': return 'Manhua';
+                default: return type;
+            }
+        }
+        
+        // Helper: Format date
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('id-ID', options);
+        }
+        
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
